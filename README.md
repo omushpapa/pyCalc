@@ -33,7 +33,7 @@ You can download the executable for
 You can do a `git-clone` of the repository
 
 ```bash
-$ git clone https://github.com/prodicus/pyCalc.git
+$ git clone https://github.com/giantas/pyCalc.git
 $ cd pyCalc/src
 $ chmod +x main.py
 $ ./main.py
