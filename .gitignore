@@ -101,3 +101,6 @@ ENV/
 # Sublime Text Project files
 *.sublime-project
 *.sublime-workspace
+
+# custom
+.idea/
