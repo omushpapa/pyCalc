@@ -1,12 +1,7 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-except ImportError:
-    # Python 2
-    import Tkinter as tk
-    import ttk
+import tkinter as tk
+from tkinter import ttk
 
 import parser
 import base64
@@ -24,11 +19,7 @@ class TkGUI(tk.Tk):
     NEW_OPERATION = False
 
     def __init__(self):
-        try:
-            super(TkGUI, self).__init__()
-        except TypeError:
-            # Python 2
-            tk.Tk.__init__(self)
+        super().__init__()
 
         self.title('Calculator')
         self.resizable(width=False, height=False)
