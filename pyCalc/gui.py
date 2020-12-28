@@ -1,11 +1,82 @@
 #! /usr/bin/env python3
 
+import base64
+import operator
 import tkinter as tk
 from tkinter import ttk
 
-import parser
-import base64
 from icons import icon_string
+
+PRECEDENCE = {
+    '(': 0,
+    '+': 1,
+    '-': 2,
+    '*': 3,
+    '/': 4,
+}
+
+OPERATORS = {
+    '+': operator.add,
+    '-': operator.sub,
+    '*': operator.mul,
+    '/': operator.truediv,
+}
+
+LEFT_PAREN = '('
+RIGHT_PAREN = ')'
+
+
+def to_postfix(expression):
+    # (A + B) * C + D
+    # A B + C * D +
+    operations = []
+    postfix = []
+    for item in expression:
+        if not item.strip():
+            continue
+
+        if item.isdigit():
+            postfix.append(item)
+
+        elif item == LEFT_PAREN:
+            operations.append(item)
+
+        elif item == RIGHT_PAREN:
+            top_operation = operations.pop()
+            while top_operation != LEFT_PAREN:
+                postfix.append(top_operation)
+                top_operation = operations.pop()
+
+        elif item in PRECEDENCE:
+            while operations and PRECEDENCE[item] < PRECEDENCE[operations[-1]]:
+                top_operation = operations.pop()
+                postfix.append(top_operation)
+
+            operations.append(item)
+
+    while operations:
+        top_operation = operations.pop()
+        postfix.append(top_operation)
+
+    return ''.join(postfix)
+
+
+def evaluate(expression):
+    operations = to_postfix(expression)
+
+    results = []
+    for token in operations:
+        if token in OPERATORS:
+            second_operand = results.pop()
+            first_operand = results.pop()
+
+            result = OPERATORS[token](float(first_operand), float(second_operand))
+            results.append(result)
+
+        else:
+            results.append(token)
+
+    return results[-1]
 
 
 class TkGUI(tk.Tk):
@@ -181,14 +252,13 @@ class TkGUI(tk.Tk):
         """
         whole_string = self.display.get()
         try:
-            # FIXME: tokenize
-            formulae = parser.expr(whole_string).compile()
-            result = eval(formulae)
-            self.clear_all()
-            self.display.insert(0, result)
+            # open('abc.txt', 'w').close()
+            result = evaluate(whole_string)
         except Exception:
-            self.clear_all()
-            self.display.insert(0, "Error!")
+            result = 'Error!'
+
+        self.clear_all()
+        self.display.insert(0, result)
 
     def run(self):
         """Initiate event loop."""
