@@ -189,7 +189,8 @@ class TkGUI(tk.Tk):
         whole_string = self.display.get()
         try:
             result = evaluate(whole_string)
-        except Exception:
+        except Exception as err:
+            logger.exception(err)
             result = 'Error!'
 
         self.output(result)

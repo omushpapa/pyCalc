@@ -1,6 +1,7 @@
 import logging
 import operator
 import tokenize
+import typing
 from decimal import Decimal
 from io import StringIO
 
@@ -32,6 +33,10 @@ OPERATORS = {
         'precedence': 4,
         'function': operator.truediv,
     },
+    '%': {
+        'precedence': 5,
+        'function': lambda x: x / 100
+    }
 }
 
 
@@ -102,18 +107,26 @@ def evaluate(expression):
 
     results = []
     for token in operations:
-        if token == 'neg':
-            operand = results.pop()
+        if token in OPERATORS:
+            function: typing.Callable = OPERATORS[token]['function']
 
-            result = OPERATORS[token]['function'](Decimal(operand))
-            results.append(result)
+            if token == 'neg':
+                operand = results.pop()
 
-        elif token in OPERATORS:
-            second_operand = results.pop()
-            first_operand = results.pop()
+                result = function(Decimal(operand))
+                results.append(result)
 
-            result = OPERATORS[token]['function'](Decimal(first_operand), Decimal(second_operand))
-            results.append(result)
+            elif token == '%':
+                operand = results.pop()
+                result = function(Decimal(operand))
+                results.append(result)
+
+            elif token in OPERATORS:
+                second_operand = results.pop()
+                first_operand = results.pop()
+
+                result = function(Decimal(first_operand), Decimal(second_operand))
+                results.append(result)
 
         else:
             results.append(token)
