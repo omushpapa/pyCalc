@@ -1,4 +1,5 @@
 import logging
+import math
 import operator
 import tokenize
 import typing
@@ -22,7 +23,7 @@ OPERATORS = {
         'function': operator.sub,
     },
     'neg': {
-        'precedence': 1,
+        'precedence': 2,
         'function': operator.neg,
     },
     '*': {
@@ -36,6 +37,10 @@ OPERATORS = {
     '%': {
         'precedence': 5,
         'function': lambda x: x / 100
+    },
+    '!': {
+        'precedence': 5,
+        'function': math.factorial,
     }
 }
 
@@ -60,7 +65,7 @@ def to_postfix(expression):
                 top_operation = operations.pop()
 
         elif token in OPERATORS:
-            while operations and OPERATORS[token]['precedence'] < OPERATORS[operations[-1]]['precedence']:
+            while operations and OPERATORS[token]['precedence'] <= OPERATORS[operations[-1]]['precedence']:
                 top_operation = operations.pop()
                 postfix.append(top_operation)
 
@@ -104,29 +109,29 @@ def get_tokens(expression):
 
 def evaluate(expression):
     operations = to_postfix(expression)
+    logger.debug(f'postfix: {operations}')
 
     results = []
     for token in operations:
         if token in OPERATORS:
             function: typing.Callable = OPERATORS[token]['function']
 
-            if token == 'neg':
-                operand = results.pop()
-
-                result = function(Decimal(operand))
-                results.append(result)
-
-            elif token == '%':
+            if token in ('neg', '%',):
                 operand = results.pop()
                 result = function(Decimal(operand))
-                results.append(result)
 
-            elif token in OPERATORS:
+            elif token == '!':
+                operand = results.pop()
+                result = function(float(operand))
+
+            else:
                 second_operand = results.pop()
                 first_operand = results.pop()
 
                 result = function(Decimal(first_operand), Decimal(second_operand))
-                results.append(result)
+
+            logger.debug(f'applied {token} to get {result}')
+            results.append(result)
 
         else:
             results.append(token)

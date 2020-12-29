@@ -6,7 +6,7 @@ from gui import TkGUI
 
 logging.basicConfig(handlers=[logging.FileHandler(settings.LOG_FILE)],
                     format=settings.LOG_FORMAT,
-                    level=logging.INFO)
+                    level=settings.LOG_LEVEl)
 
 logger = logging.getLogger(__name__)
 logger.info(f'initialising')
