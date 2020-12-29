@@ -14,6 +14,8 @@ from screeninfo import get_monitors
 
 from icons import icon_string
 
+logger = logging.getLogger(__name__)
+
 PRECEDENCE = {
     '(': 0,
     '+': 1,
