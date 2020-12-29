@@ -3,6 +3,9 @@
 import base64
 import operator
 import tkinter as tk
+import tokenize
+from decimal import Decimal
+from io import StringIO
 from tkinter import ttk
 
 from icons import icon_string
@@ -10,7 +13,8 @@ from icons import icon_string
 PRECEDENCE = {
     '(': 0,
     '+': 1,
-    '-': 2,
+    '-': 1,
+    'neg': 1,
     '*': 3,
     '/': 4,
 }
@@ -20,6 +24,7 @@ OPERATORS = {
     '-': operator.sub,
     '*': operator.mul,
     '/': operator.truediv,
+    'neg': operator.neg,
 }
 
 LEFT_PAREN = '('
@@ -27,38 +32,65 @@ RIGHT_PAREN = ')'
 
 
 def to_postfix(expression):
-    # (A + B) * C + D
-    # A B + C * D +
+    tokens = get_tokens(expression)
+    
     operations = []
     postfix = []
-    for item in expression:
-        if not item.strip():
+
+    for i, token in enumerate(tokens):
+        if not token.strip():
             continue
 
-        if item.isdigit():
-            postfix.append(item)
+        if token == LEFT_PAREN:
+            operations.append(token)
 
-        elif item == LEFT_PAREN:
-            operations.append(item)
-
-        elif item == RIGHT_PAREN:
+        elif token == RIGHT_PAREN:
             top_operation = operations.pop()
             while top_operation != LEFT_PAREN:
                 postfix.append(top_operation)
                 top_operation = operations.pop()
 
-        elif item in PRECEDENCE:
-            while operations and PRECEDENCE[item] < PRECEDENCE[operations[-1]]:
+        elif token in OPERATORS:
+            while operations and PRECEDENCE[token] < PRECEDENCE[operations[-1]]:
                 top_operation = operations.pop()
                 postfix.append(top_operation)
 
-            operations.append(item)
+            operations.append(token)
+
+        else:
+            try:
+                float(token)
+            except (ValueError, TypeError):
+                pass
+            else:
+                postfix.append(token)
 
     while operations:
         top_operation = operations.pop()
         postfix.append(top_operation)
 
-    return ''.join(postfix)
+    return postfix
+
+
+def get_tokens(expression):
+    tokens = tokenize.generate_tokens(StringIO(expression).readline)
+    final_tokens = []
+    swap_indexes = []
+    for i, token in enumerate(tokens):
+        token_string = token[1]
+        if token_string:
+            if token_string == '-':
+                if not final_tokens or (final_tokens and final_tokens[-1] in PRECEDENCE):
+                    swap_indexes.append(len(final_tokens))
+
+            final_tokens.append(token_string)
+
+    for index in swap_indexes:
+        number = final_tokens[index + 1]
+        final_tokens[index] = number
+        final_tokens[index + 1] = 'neg'
+
+    return final_tokens
 
 
 def evaluate(expression):
@@ -66,11 +98,17 @@ def evaluate(expression):
 
     results = []
     for token in operations:
-        if token in OPERATORS:
+        if token == 'neg':
+            operand = results.pop()
+
+            result = operator.neg(Decimal(operand))
+            results.append(result)
+
+        elif token in OPERATORS:
             second_operand = results.pop()
             first_operand = results.pop()
 
-            result = OPERATORS[token](float(first_operand), float(second_operand))
+            result = OPERATORS[token](Decimal(first_operand), Decimal(second_operand))
             results.append(result)
 
         else:
