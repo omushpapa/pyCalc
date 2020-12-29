@@ -10,6 +10,8 @@ from decimal import Decimal
 from io import StringIO
 from tkinter import ttk
 
+from screeninfo import get_monitors
+
 from icons import icon_string
 
 PRECEDENCE = {
@@ -134,6 +136,17 @@ class TkGUI(tk.Tk):
 
         self.title('Calculator')
         self.resizable(width=False, height=False)
+
+        # center
+        # w, h = 260, 160
+        w = self.winfo_reqwidth()
+        h = self.winfo_reqheight()
+        monitors = get_monitors()
+        monitor = monitors[0]
+        ws, hs = monitor.width, monitor.height
+        x = (ws // 2) - (w // 2)
+        y = (hs // 2) - (h // 2)
+        self.geometry(f'+{x}+{y}')
 
         # Configure default theme
         style = ttk.Style(self)
