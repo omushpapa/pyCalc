@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
 import base64
+import logging
+import math
 import operator
 import tkinter as tk
 import tokenize
@@ -33,7 +35,7 @@ RIGHT_PAREN = ')'
 
 def to_postfix(expression):
     tokens = get_tokens(expression)
-    
+
     operations = []
     postfix = []
 
@@ -238,17 +240,12 @@ class TkGUI(tk.Tk):
 
     def factorial(self, operator):
         """Calculates the factorial of the number entered."""
-        number = int(self.display.get())
-        fact = 1
         try:
-            while number > 0:
-                fact = fact * number
-                number -= 1
-            self.clear_all()
-            self.display.insert(0, fact)
+            number = int(self.display.get())
+            result = math.factorial(number)
+            self.output(str(result))
         except Exception:
-            self.clear_all()
-            self.display.insert(0, "Error")
+            self.output("Error")
 
     def clear_all(self, new_operation=True):
         """clears all the content in the Entry widget."""
@@ -277,26 +274,23 @@ class TkGUI(tk.Tk):
         if len(whole_string):  # repeats until
             # now just decrement the string by one index
             new_string = whole_string[:-1]
-            self.clear_all(new_operation=False)
-            self.display.insert(0, new_string)
+            self.output(new_string, new_operation=False)
         else:
-            self.clear_all()
-            self.display.insert(0, "Error, press AC")
+            self.output("Error, press AC")
 
     def calculate(self):
-        """Evaluates the expression.
-
-        ref : http://stackoverflow.com/questions/594266/equation-parsing-in-python
-        """
+        """Evaluates the expression."""
         whole_string = self.display.get()
         try:
-            # open('abc.txt', 'w').close()
             result = evaluate(whole_string)
         except Exception:
             result = 'Error!'
 
-        self.clear_all()
-        self.display.insert(0, result)
+        self.output(result)
+
+    def output(self, text='', new_operation=True):
+        self.clear_all(new_operation)
+        self.display.insert(0, text)
 
     def run(self):
         """Initiate event loop."""
