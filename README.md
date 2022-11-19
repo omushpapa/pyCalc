@@ -58,4 +58,4 @@ Feel free to contribute
 
 ## License :
 
-MIT License [http://prodicus.mit-license.org/](http://prodicus.mit-license.org/) &copy; Tasdik Rahman
+[MIT License](LICENSE)
