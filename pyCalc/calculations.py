@@ -18,6 +18,12 @@ class Operator(typing.NamedTuple):
     precedence: int
     function: typing.Callable = None
 
+    def __str__(self):
+        return self.symbol
+
+    def __repr__(self):
+        return str(self)
+
 
 class Operators(Enum):
     LEFT_PARENTHESIS = Operator('(', 0)
@@ -58,6 +64,12 @@ class Operators(Enum):
     @property
     def symbol(self):
         return self.value.symbol
+
+    def __str__(self):
+        return self.value.symbol
+
+    def __repr__(self):
+        return str(self)
 
 
 def to_postfix(expression):
